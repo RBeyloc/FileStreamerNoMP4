@@ -38,9 +38,9 @@ public class UserRestController {
     }
 
     //CRUD: read, find one user by id
-    @GetMapping(path = "/getUser")
-    public ResponseEntity<User> findUserById(@RequestParam UUID userUUID) {
-        Optional<User> userFound = userservice.findUserById(userUUID);
+    @GetMapping("/getUser/{userId}")
+    public ResponseEntity<User> findUserById(@PathVariable UUID userId) {
+        Optional<User> userFound = userservice.findUserById(userId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("operation", "getUser");
@@ -54,8 +54,25 @@ public class UserRestController {
         }
     }
 
+    //CRUD: delete book by id
+    @DeleteMapping("/deleteUser/{userId}")
+    public ResponseEntity<User> deleteUser(@PathVariable UUID userId) {
+        Optional<User> userFound = userservice.deleteUserById(userId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("operation", "deleteUser");
+
+        if (userFound.isPresent()) {
+            headers.add("operationStatus", "deleted");
+            return ResponseEntity.accepted().headers(headers).body(userFound.get());
+        } else {
+            headers.add("operationStatus", "fail");
+            return ResponseEntity.accepted().headers(headers).body(null);
+        }
+    }
+
     //CRUD: create
-    @PostMapping(path = "/addUser", consumes = "application/JSON")
+    @PostMapping(path = "/addUser", consumes = "application/json")
     public ResponseEntity<User> addUser(@RequestBody User user) {
         Optional<User> userCreated = userservice.createUser(user);
 
@@ -71,25 +88,10 @@ public class UserRestController {
         }
     }
 
-    //CRUD: delete book by id
-    @DeleteMapping(path = "/deleteUser")
-    public ResponseEntity<User> deleteUser(@RequestParam UUID userId) {
-        Optional<User> userFound = userservice.deleteUserById(userId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("operation", "deleteUser");
-
-        if (userFound.isPresent()) {
-            headers.add("operationStatus", "deleted");
-            return ResponseEntity.accepted().headers(headers).body(userFound.get());
-        } else {
-            headers.add("operationStatus", "fail");
-            return ResponseEntity.accepted().headers(headers).body(null);
-        }
-    }
 
     //CRUD: update
-    @PutMapping(path = "/updateUser", consumes = "application/JSON")
+    @PostMapping(path = "/updateUser", consumes = "application/JSON")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         Optional<User> userFound = userservice.findUserById(user.getUserUUID());
         Optional<User> userUpdate = userFound;
